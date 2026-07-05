@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#1f1d1b" />
+  <title>Caisse & Pointage — Burger Minute</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+  <!-- ====================== ÉCRAN DE CONNEXION ====================== -->
+  <section id="login-screen" class="login-screen">
+    <div class="login-card">
+      <div class="logo">
+        <div class="logo-burger">🍔</div>
+        <h1>Burger Minute</h1>
+        <p class="logo-sub">Caisse &amp; Pointage · Tigzirt</p>
+      </div>
+      <form id="login-form" autocomplete="off">
+        <label>
+          <span>Utilisateur</span>
+          <input type="text" id="login-user" required autocomplete="username" />
+        </label>
+        <label>
+          <span>Mot de passe</span>
+          <input type="password" id="login-pass" required autocomplete="current-password" />
+        </label>
+        <button type="submit" class="btn btn-primary btn-block">Se connecter</button>
+        <p id="login-error" class="error-msg" hidden></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ====================== APPLICATION ====================== -->
+  <div id="app" class="app" hidden>
+
+    <header class="topbar">
+      <div class="topbar-title">
+        <span class="topbar-burger">🍔</span>
+        <span>Burger Minute</span>
+      </div>
+      <div class="topbar-actions">
+        <span id="topbar-user" class="topbar-user"></span>
+      </div>
+    </header>
+
+    <main id="main" class="main">
+
+      <!-- ============ ONGLET JOUR ============ -->
+      <section id="tab-jour" class="tab-content">
+        <h2 class="tab-title">Journée du</h2>
+        <input type="date" id="jour-date" class="input-date" />
+
+        <div class="card">
+          <h3 class="card-title">Pointage employés</h3>
+          <div id="jour-workers"></div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Caisse</h3>
+          <label class="field">
+            <span>Caisse comptée en fin de journée</span>
+            <input type="number" id="jour-caisseFin" min="0" step="100" inputmode="numeric" placeholder="0 DA" />
+          </label>
+          <label class="field">
+            <span>Dépenses / achats payés cash</span>
+            <input type="number" id="jour-depenses" min="0" step="100" inputmode="numeric" placeholder="0 DA" />
+          </label>
+        </div>
+
+        <div class="card card-resume">
+          <h3 class="card-title">Résumé (en direct)</h3>
+          <div class="resume-grid">
+            <div class="resume-item">
+              <span class="resume-label">Recette reconstituée</span>
+              <span id="resume-recette" class="resume-value">—</span>
+            </div>
+            <div class="resume-item">
+              <span class="resume-label">Charges fixes</span>
+              <span id="resume-charges" class="resume-value">—</span>
+            </div>
+            <div class="resume-item resume-benefice">
+              <span class="resume-label">Bénéfice du jour</span>
+              <span id="resume-benefice" class="resume-value">—</span>
+            </div>
+          </div>
+        </div>
+
+        <button id="jour-save" class="btn btn-primary btn-block">Enregistrer cette journée</button>
+        <p id="jour-status" class="status-msg" hidden></p>
+      </section>
+
+      <!-- ============ ONGLET HISTORIQUE ============ -->
+      <section id="tab-historique" class="tab-content" hidden>
+        <h2 class="tab-title">Historique</h2>
+        <div id="historique-list" class="history-list">
+          <p class="empty">Aucune journée enregistrée pour le moment.</p>
+        </div>
+      </section>
+
+      <!-- ============ ONGLET FINANCES ============ -->
+      <section id="tab-finances" class="tab-content" hidden>
+        <h2 class="tab-title">Finances</h2>
+
+        <div class="card">
+          <h3 class="card-title">Période analysée</h3>
+          <div class="period-row">
+            <label class="field field-half">
+              <span>Du</span>
+              <input type="date" id="fin-start" />
+            </label>
+            <label class="field field-half">
+              <span>Au</span>
+              <input type="date" id="fin-end" />
+            </label>
+          </div>
+          <button id="fin-refresh" class="btn btn-secondary btn-block">Recalculer</button>
+        </div>
+
+        <!-- 1. Employés -->
+        <div class="card">
+          <h3 class="card-title">Employés</h3>
+          <div id="fin-workers" class="table-wrap">
+            <p class="empty">Sélectionnez une période et appuyez sur « Recalculer ».</p>
+          </div>
+        </div>
+
+        <!-- 2. Fournisseurs -->
+        <div class="card">
+          <div class="card-title-row">
+            <h3 class="card-title">Fournisseurs</h3>
+            <button id="sup-add" class="btn btn-tiny">+ Ajouter</button>
+          </div>
+          <div id="fin-suppliers" class="table-wrap">
+            <p class="empty">Aucun fournisseur enregistré.</p>
+          </div>
+
+          <h4 class="sub-title">Transactions</h4>
+          <button id="tx-add" class="btn btn-tiny btn-block">+ Nouvelle transaction</button>
+          <div id="fin-tx" class="tx-list">
+            <p class="empty">Aucune transaction.</p>
+          </div>
+        </div>
+
+        <!-- 3. Bilan global -->
+        <div class="card card-bilan">
+          <h3 class="card-title">Bilan global</h3>
+          <div class="bilan-grid">
+            <div class="bilan-item">
+              <span class="bilan-label">Bénéfice cumulé (période)</span>
+              <span id="bilan-cumule" class="bilan-value">—</span>
+            </div>
+            <div class="bilan-item">
+              <span class="bilan-label">Dette fournisseurs (actuelle)</span>
+              <span id="bilan-dette" class="bilan-value">—</span>
+            </div>
+            <div class="bilan-item">
+              <span class="bilan-label">Σ Soldes employés (période)</span>
+              <span id="bilan-soldes" class="bilan-value">—</span>
+            </div>
+            <div class="bilan-item bilan-net">
+              <span class="bilan-label">Bénéfice net</span>
+              <span id="bilan-net" class="bilan-value">—</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ ONGLET RÉGLAGES ============ -->
+      <section id="tab-reglages" class="tab-content" hidden>
+        <h2 class="tab-title">Réglages</h2>
+
+        <div class="card">
+          <h3 class="card-title">Caisse &amp; charges</h3>
+          <label class="field">
+            <span>Fond de caisse quotidien (DA)</span>
+            <input type="number" id="set-fond" min="0" step="100" inputmode="numeric" />
+          </label>
+          <label class="field">
+            <span>Charges fixes journalières (DA) — incluent déjà les salaires</span>
+            <input type="number" id="set-charges" min="0" step="100" inputmode="numeric" />
+          </label>
+          <button id="set-save" class="btn btn-primary btn-block">Enregistrer les réglages</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title-row">
+            <h3 class="card-title">Employés</h3>
+            <button id="wk-add" class="btn btn-tiny">+ Ajouter</button>
+          </div>
+          <div id="set-workers"></div>
+        </div>
+
+        <button id="logout-btn" class="btn btn-danger btn-block">Se déconnecter</button>
+      </section>
+
+    </main>
+
+    <!-- Barre de navigation basse -->
+    <nav class="bottomnav">
+      <button class="nav-btn active" data-tab="jour">
+        <span class="nav-ico">📅</span><span>Jour</span>
+      </button>
+      <button class="nav-btn" data-tab="historique">
+        <span class="nav-ico">📚</span><span>Historique</span>
+      </button>
+      <button class="nav-btn" data-tab="finances">
+        <span class="nav-ico">💰</span><span>Finances</span>
+      </button>
+      <button class="nav-btn" data-tab="reglages">
+        <span class="nav-ico">⚙️</span><span>Réglages</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ====================== MODALE GÉNÉRIQUE ====================== -->
+  <div id="modal-root" class="modal-root" hidden>
+    <div class="modal-backdrop"></div>
+    <div class="modal-card">
+      <h3 id="modal-title" class="modal-title">Titre</h3>
+      <div id="modal-body" class="modal-body"></div>
+      <div class="modal-actions">
+        <button id="modal-cancel" class="btn btn-secondary">Annuler</button>
+        <button id="modal-ok" class="btn btn-primary">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================== TOAST ====================== -->
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
